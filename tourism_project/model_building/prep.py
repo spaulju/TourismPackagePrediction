@@ -5,9 +5,11 @@ def prep_data():
     file_path = "tourism_project/data/tourism.csv"
     df = pd.read_csv(file_path)
     
-    # Drop CustomerID as it has no predictive value
+    # Drop ID and Index columns as they have no predictive value
     if 'CustomerID' in df.columns:
         df = df.drop('CustomerID', axis=1)
+    if 'Unnamed: 0' in df.columns:
+        df = df.drop('Unnamed: 0', axis=1)
         
     # Impute missing values with forward/backward fill for simplicity before split
     df = df.ffill().bfill()
