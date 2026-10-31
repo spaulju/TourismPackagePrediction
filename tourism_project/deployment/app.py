@@ -3,10 +3,7 @@ import joblib
 import pandas as pd
 import streamlit as st
 
-# Set page configuration
 st.set_page_config(page_title="Wellness Tourism Package Predictor", layout="centered")
-
-# Load the trained model from the deployment directory
 model_path = os.path.join(os.path.dirname(__file__), 'best_model.pkl')
 
 @st.cache_resource
@@ -22,9 +19,7 @@ except Exception as e:
     st.error(f"Failed to load model: {e}")
     st.stop()
 
-# Collect user inputs across two columns
 col1, col2 = st.columns(2)
-
 with col1:
     age = st.number_input("Age", min_value=18, max_value=100, value=35)
     typeof_contact = st.selectbox("Type of Contact", ["Self Enquiry", "Company Invited"])
@@ -47,9 +42,7 @@ with col2:
     designation = st.selectbox("Designation", ["Executive", "Manager", "Senior Manager", "AVP", "VP"])
     monthly_income = st.number_input("Monthly Income", min_value=1000.0, max_value=500000.0, value=25000.0)
 
-# Predict button
 if st.button("Predict Purchase Likelihood"):
-    # Construct DataFrame with exact feature names and order expected by the model
     input_df = pd.DataFrame({
         'Age': [float(age)],
         'TypeofContact': [typeof_contact],
@@ -70,10 +63,10 @@ if st.button("Predict Purchase Likelihood"):
         'Designation': [designation],
         'MonthlyIncome': [float(monthly_income)]
     })
-    
+
     prediction = model.predict(input_df)[0]
     probability = model.predict_proba(input_df)[0][1]
-    
+
     if prediction == 1:
         st.success(f"Prediction: Customer WILL purchase the package! (Confidence: {probability:.1%})")
     else:
