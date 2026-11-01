@@ -70,10 +70,37 @@ jobs:
           sleep 5  # Wait for a moment to let the server starts
       - name: Model Building
         run: python tourism_project/model_building/train.py
+
       - name: Commit Trained Model
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tourism_project/deployment/best_model.pkl  # path to the saved model file
-          git commit -m "Add trained model [skip ci]" || echo "No changes to commit"
-          git push
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          MODEL_PATH="tourism_project/deployment/best_model.pkl"
+
+          # Check whether training produced the model.
+          if [ ! -f "$MODEL_PATH" ]; then
+            echo "ERROR: Trained model not found."
+            exit 1
+          fi
+
+          # Stage only the model artifact.
+          git add "$MODEL_PATH"
+
+          # Create a commit only when the model changed.
+          if git diff --cached --quiet; then
+            echo "Model unchanged. No commit needed."
+            exit 0
+          fi
+
+          git commit -m "Update trained model [skip ci]"
+
+          # Incorporate newer commits from GitHub.
+          git pull --rebase origin main
+
+          # Push the trained model.
+          git push origin HEAD:main
+
+concurrency:
+  group: tourism-pipeline-${{ github.ref }}
+  cancel-in-progress: true
